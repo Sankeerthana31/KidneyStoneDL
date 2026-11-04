@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+outputs/
+data/**/*.tif
+data/**/*.png
+data/**/*.jpg
+data/**/*.dcm
+!data/README.md

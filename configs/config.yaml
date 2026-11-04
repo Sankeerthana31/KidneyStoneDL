@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# Deep learning framework for automated kidney localisation, kidney stone
+# detection and kidney stone localisation in abdominal CT images.
+# Any value can be overridden from the command line (e.g. --epochs 10).
+# ---------------------------------------------------------------------------
+common:
+  seed: 42
+  device: auto            # auto | cuda | cpu | mps
+  n_folds: 5              # 5-fold CV + 1 patient-level hold-out fold (paper, Table 3.1)
+
+paths:
+  kidney_data: data/kidney                 # paper dataset (prepared by scripts/prepare_kidney_dataset.py)
+  stone_data: data/stone_seg               # uploaded dataset (image/ + label/)
+  external_data: data/ct_kidney_external   # CT KIDNEY DATASET: Normal/ + Stone/
+  outputs: outputs
+
+# ---- Stage 1: kidney localisation (I2IRegNet, image-to-image regression) ----
+i2iregnet:
+  img_size: 224
+  epochs: 50
+  batch_size: 16
+  lr: 0.0001
+  roi_threshold: 0.05     # ROI_hat > t  -> binary kidney mask (for IoU / Dice)
+
+# ---- Stage 2: stone detection (ClfNet dual encoder + CBAM) ------------------
+clfnet:
+  img_size: 224
+  epochs: 50
+  batch_size: 32
+  lr: 0.0001
+  deep_encoder: squeezenet   # squeezenet (paper best) | resnet18 | efficientnetv2s
+  use_shallow: true
+  use_cbam: true
+  dropout: 0.5
+  input: roi                 # roi (ground-truth kidney ROI, as in paper) | image (full slice baseline)
+
+# ---- Joint cascade: I2IReg-ClfNet --------------------------------------------
+cascade:
+  img_size: 224
+  epochs: 50
+  batch_size: 16
+  lr: 0.0001
+  w_reg: 0.8
+  w_clf: 0.2
+  deep_encoder: squeezenet
+  use_shallow: true
+  use_cbam: true
+  dropout: 0.5
+  roi_threshold: 0.05
+
+# ---- Stone localisation (StoneUNet on uploaded dataset) ----------------------
+stone_seg:
+  full_size: 512          # native resolution - stones are tiny (median ~29 px)
+  crop: 256
+  pos_crop_prob: 0.7
+  encoder: resnet34
+  epochs: 80
+  batch_size: 8
+  lr: 0.0003
+  threshold: 0.5
+  min_area: 2
+  group_max: 40           # contiguous-ID grouping for leakage-free splits
+
+# ---- Inference pipeline -------------------------------------------------------
+inference:
+  stone_prob_threshold: 0.5     # classifier P(stone) threshold
+  seg_threshold: 0.5
+  restrict_to_kidney: true      # keep only stones inside the (dilated) predicted kidney ROI
+  kidney_dilate_px: 15          # dilation of kidney mask at 512 resolution
+  dicom_window: [400, 1800]     # level, width (bone-ish window keeps stones visible) for .dcm input

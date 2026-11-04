@@ -1,0 +1,291 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "0. Self-test (run first)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/test_setup.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "1. Make splits - stone dataset (uploaded)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/make_splits.py",
+      "args": [
+        "--dataset",
+        "stone"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "2. Train StoneUNet - stone localisation",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train_stone_seg.py",
+      "args": [
+        "--fold",
+        "0"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "2b. Quick debug run - StoneUNet (2 epochs, 32 slices)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train_stone_seg.py",
+      "args": [
+        "--fold",
+        "0",
+        "--epochs",
+        "2",
+        "--limit",
+        "32"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "3. Evaluate StoneUNet (hold-out)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/evaluate.py",
+      "args": [
+        "--task",
+        "stone",
+        "--ckpt",
+        "outputs/stone_seg/fold0/best.pt",
+        "--save_examples",
+        "12"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "4. Prepare paper dataset (kidney masks)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/prepare_kidney_dataset.py",
+      "args": [
+        "--raw_dir",
+        "${input:rawDir}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "5. Make splits - kidney dataset (paper)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/make_splits.py",
+      "args": [
+        "--dataset",
+        "kidney"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "6. Train I2IRegNet - kidney localisation",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train_i2iregnet.py",
+      "args": [
+        "--fold",
+        "0"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "7. Train ClfNet - stone detection",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train_clfnet.py",
+      "args": [
+        "--fold",
+        "0"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "8. Train I2IReg-ClfNet cascade",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train_cascade.py",
+      "args": [
+        "--fold",
+        "0",
+        "--init_reg",
+        "outputs/i2iregnet/fold0/best.pt",
+        "--init_clf",
+        "outputs/clfnet/ShN+squeezenet+CBAM_roi/fold0/best.pt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "9. Evaluate cascade (hold-out)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/evaluate.py",
+      "args": [
+        "--task",
+        "cascade",
+        "--ckpt",
+        "outputs/cascade/fold0/best.pt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "10. External test - CT KIDNEY DATASET",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/evaluate_external.py",
+      "args": [
+        "--ckpt",
+        "outputs/cascade/fold0/best.pt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "11. Predict - full pipeline on a file/folder",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/predict.py",
+      "args": [
+        "--input",
+        "${input:inputPath}",
+        "--cascade",
+        "outputs/cascade/fold0/best.pt",
+        "--stone",
+        "outputs/stone_seg/fold0/best.pt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "11b. Predict - stone localisation only",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/predict.py",
+      "args": [
+        "--input",
+        "${input:inputPath}",
+        "--stone",
+        "outputs/stone_seg/fold0/best.pt"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "12. 5-fold CV - cascade",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_cv.py",
+      "args": [
+        "--script",
+        "train_cascade.py"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "13. Streamlit app",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": [
+        "run",
+        "app.py"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "rawDir",
+      "type": "promptString",
+      "description": "Folder of the downloaded paper dataset",
+      "default": "data/raw_kidney"
+    },
+    {
+      "id": "inputPath",
+      "type": "promptString",
+      "description": "CT slice file or folder",
+      "default": "data/stone_seg/image/1000.tif"
+    }
+  ]
+}

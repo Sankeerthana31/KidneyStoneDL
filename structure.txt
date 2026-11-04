@@ -1,0 +1,90 @@
+﻿=== FOLDERS (with file counts) ===
+Dataset   [0 files]
+Dataset\dataset_integrated_task   [0 files]
+Dataset\dataset_integrated_task\cross_validation   [0 files]
+Dataset\dataset_integrated_task\holdout   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Negative   [302 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Positive   [283 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Negative   [374 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Positive   [311 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Negative   [367 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Positive   [385 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Negative   [340 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Positive   [362 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Negative   [343 files]
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Positive   [385 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5   [0 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Negative   [1424 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Positive   [1443 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Negative   [1352 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Positive   [1415 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Negative   [1359 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Positive   [1341 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Negative   [1386 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Positive   [1364 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Negative   [1383 files]
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Positive   [1341 files]
+Dataset\dataset_integrated_task\holdout\Negative   [292 files]
+Dataset\dataset_integrated_task\holdout\Positive   [440 files]
+
+=== SAMPLE FILES ===
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Negative\284.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Negative\285.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_1\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Negative\312.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Negative\313.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_2\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Negative\386.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Negative\387.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_3\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Negative\363.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Negative\364.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_4\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Negative\386.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Negative\387.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Test\Fold_5\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Negative\1444.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Negative\1445.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_1\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Negative\1416.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Negative\1417.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_2\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Negative\1342.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Negative\1343.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_3\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Negative\1365.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Negative\1366.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_4\Positive\10.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Negative\1342.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Negative\1343.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Positive\1.jpg
+Dataset\dataset_integrated_task\cross_validation\Training\Fold_5\Positive\10.jpg
+Dataset\dataset_integrated_task\holdout\Negative\441.jpg
+Dataset\dataset_integrated_task\holdout\Negative\442.jpg
+Dataset\dataset_integrated_task\holdout\Positive\1.jpg
+Dataset\dataset_integrated_task\holdout\Positive\10.jpg
+
+=== EXTENSIONS ===
+.jpg  17992
+
+=== CSV / XLSX / TXT / JSON / MAT ===

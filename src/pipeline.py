@@ -46,12 +46,27 @@ def clean_kidney_mask(mask, keep=2, open_px=3):
     return np.isin(lab, order).astype(np.uint8)
 
 
+def kidney_region(mask, dilate_px=15, hull=True):
+    """Search region for stones: each kidney's convex hull (fills the C-shaped mask's hollow
+    centre - the renal sinus/pelvis, where many stones sit), then dilated by `dilate_px`."""
+    m = (mask > 0).astype(np.uint8)
+    if hull and m.any():
+        cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        filled = np.zeros_like(m)
+        for c in cnts:
+            cv2.fillPoly(filled, [cv2.convexHull(c)], 1)
+        m = filled
+    if dilate_px > 0:
+        m = cv2.dilate(m, np.ones((dilate_px, dilate_px), np.uint8))
+    return m
+
+
 class KidneyStonePipeline:
     def __init__(self, cascade_ckpt=None, reg_ckpt=None, clf_ckpt=None, stone_ckpt=None,
                  device="auto", cfg=None):
         self.device = get_device(device)
         self.cfg = {"stone_prob_threshold": 0.5, "seg_threshold": 0.5, "restrict_to_kidney": True,
-                    "kidney_dilate_px": 15, "roi_threshold": 0.05, "min_area": 2,
+                    "kidney_dilate_px": 30, "roi_threshold": 0.05, "min_area": 2,
                     "dicom_window": [400, 1800], "img_size": 224, "full_size": 512}
         self.cfg.update(cfg or {})
         self.reg = self.clf = self.stone = None
@@ -67,6 +82,9 @@ class KidneyStonePipeline:
             if reg_ckpt:
                 _, ck = _peek_cfg(reg_ckpt)
                 self.reg = _load(I2IRegNet(pretrained=False), ck)
+                t = ck.get("extra", {}).get("roi_threshold") if isinstance(ck, dict) else None
+                if t is not None:
+                    self.cfg["roi_threshold"] = float(t)
             if clf_ckpt:
                 c, ck = _peek_cfg(clf_ckpt)
                 self.clf = _load(ClfNet(deep_encoder=c.get("deep_encoder", "squeezenet"),
@@ -129,10 +147,10 @@ class KidneyStonePipeline:
                 xs = to_3ch_tensor(resize(img, F))[None].to(self.device)
                 prob = torch.sigmoid(self.stone(xs))[0, 0].cpu().numpy()
             prob = cv2.resize(prob, (W, H))
-            if self.cfg["restrict_to_kidney"] and "kidney_mask" in res:
+            # kidney found -> keep stones in its (hull + dilated) region; no kidney (e.g. ureter level) -> whole slice
+            if self.cfg["restrict_to_kidney"] and "kidney_mask" in res and res["kidney_mask"].any():
                 k = max(1, int(self.cfg["kidney_dilate_px"] * W / 512))
-                kd = cv2.dilate(res["kidney_mask"].astype(np.uint8), np.ones((k, k), np.uint8))
-                prob = prob * kd
+                prob = prob * kidney_region(res["kidney_mask"], k, hull=True)
             res["stone_prob_map"] = prob
             seg = prob > self.cfg["seg_threshold"]
             stones, _ = components(seg, self.cfg["min_area"])

@@ -21,13 +21,14 @@ def main():
     ap.add_argument("--dataset", choices=["kidney", "stone"], required=True)
     ap.add_argument("--config", default=None)
     ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--data", default=None, help="dataset folder (default from config), e.g. data/kidney_masks")
     a = ap.parse_args()
     cfg = load_config(a.config)
     seed = a.seed if a.seed is not None else cfg["common"]["seed"]
     n_folds = cfg["common"]["n_folds"]
 
     if a.dataset == "kidney":
-        root = resolve(cfg["paths"]["kidney_data"])
+        root = resolve(a.data or cfg["paths"]["kidney_data"])
         df = pd.read_csv(root / "labels.csv")
         # stratify on patient-level label (does the patient have any Stone+ slice?)
         pat_lab = df.groupby("patient_id")["label"].max()

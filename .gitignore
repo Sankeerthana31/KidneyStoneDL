@@ -7,3 +7,9 @@ data/**/*.png
 data/**/*.jpg
 data/**/*.dcm
 !data/README.md
+
+# Large datasets and generated files
+/data/totalseg_small.zip
+/data/raw_totalseg/
+/data/kidney_masks/
+/data/totalseg_small.zip

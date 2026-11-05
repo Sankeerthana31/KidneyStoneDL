@@ -19,10 +19,11 @@ from src.utils import load_config  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 # Set to True when the kidney-localisation model (I2IReg-ClfNet) has been trained.
-SHOW_KIDNEY_MODEL = False
+SHOW_KIDNEY_MODEL = True
 st.set_page_config(page_title="Kidney Stone CT", layout="wide")
 st.title("Kidney stone detection & localisation in abdominal CT")
-st.caption("Stone detection (ClfNet) + stone localisation (StoneUNet). Research use only - not a medical device.")
+st.caption("Kidney localisation (I2IRegNet) + stone detection (ClfNet) + stone localisation (StoneUNet). "
+           "Research use only - not a medical device.")
 
 
 def find(keyword):
@@ -39,7 +40,7 @@ def _num(p):
 
 
 # Sample images left out of the demo gallery (they are still part of the reported hold-out metrics).
-EXCLUDE = {"HO_pos_1.png", "HO_pos_221.png"}
+EXCLUDE = {"HO_pos_1.png", "HO_pos_221.png", "HO_neg_514.png", "HO_neg_513.png", "HO_neg_515.png", "34.tif"}
 
 
 @st.cache_data
@@ -49,12 +50,13 @@ def sample_images(n_per_class=4):
     samples = []
     kimg = ROOT / "data" / "kidney" / "images"
     if kimg.exists():
-        pos = [p for p in sorted(kimg.glob("HO_pos_*.png"), key=_num) if p.name not in EXCLUDE]
-        neg = [p for p in sorted(kimg.glob("HO_neg_*.png"), key=_num) if p.name not in EXCLUDE]
+        pos = sorted(kimg.glob("HO_pos_*.png"), key=_num)
+        neg = sorted(kimg.glob("HO_neg_*.png"), key=_num)
         step_p = max(1, len(pos) // n_per_class)
         step_n = max(1, len(neg) // n_per_class)
-        samples += [(str(p), "Stone+", "Figshare hold-out") for p in pos[::step_p][:n_per_class]]
-        samples += [(str(p), "Stone-", "Figshare hold-out") for p in neg[::step_n][:n_per_class]]
+        # excluded images are simply dropped (no replacement image is added)
+        samples += [(str(p), "Stone+", "Figshare hold-out") for p in pos[::step_p][:n_per_class] if p.name not in EXCLUDE]
+        samples += [(str(p), "Stone-", "Figshare hold-out") for p in neg[::step_n][:n_per_class] if p.name not in EXCLUDE]
     sroot = ROOT / "data" / "stone_seg"
     if (sroot / "splits.json").exists():
         folds = json.load(open(sroot / "splits.json", encoding="utf-8"))["folds"]
@@ -62,7 +64,7 @@ def sample_images(n_per_class=4):
         step = max(1, len(ho) // n_per_class)
         for i in ho[::step][:n_per_class]:
             p = sroot / "image" / f"{i}.tif"
-            if p.exists() and p.name not in EXCLUDE:
+            if p.exists() and p.name not in EXCLUDE:  # dropped, not replaced
                 samples.append((str(p), "Stone+", "Uploaded dataset hold-out"))
     return samples
 
@@ -76,11 +78,12 @@ def thumbnail(path):
 cfg = load_config()
 with st.sidebar:
     st.header("Models")
-    cascade = st.selectbox("I2IReg-ClfNet (kidney ROI + detection)", find("cascade")) if SHOW_KIDNEY_MODEL else ""
+    cascade = ""  # joint I2IReg-ClfNet cascade not trained - option hidden
+    reg = st.selectbox("I2IRegNet - kidney localisation", find("i2iregnet")) if SHOW_KIDNEY_MODEL else ""
     clf = st.selectbox("ClfNet - stone detection", find("clfnet"))
     stone = st.selectbox("StoneUNet - stone localisation", find("stone_seg"))
     st.header("Settings")
-    restrict = (st.checkbox("Keep stones only inside kidney ROI (needs cascade)", value=True)
+    restrict = (st.checkbox("Keep stones only inside kidney region (whole slice if no kidney found)", value=False)
                 if SHOW_KIDNEY_MODEL else False)
     seg_thr = st.slider("Stone mask threshold", 0.05, 0.95, float(cfg["inference"]["seg_threshold"]), 0.05)
     decision = st.radio("Final decision based on",
@@ -91,18 +94,19 @@ with st.sidebar:
 
 
 @st.cache_resource
-def get_pipe(cascade, clf, stone, restrict, seg_thr, clf_thr, learned):
+def get_pipe(cascade, reg, clf, stone, restrict, seg_thr, clf_thr, learned):
     icfg = dict(cfg["inference"], restrict_to_kidney=restrict, seg_threshold=seg_thr,
                 stone_prob_threshold=clf_thr, override_threshold=not learned,
                 min_area=cfg["stone_seg"]["min_area"])
     return KidneyStonePipeline(cascade_ckpt=str(ROOT / cascade) if cascade else None,
+                               reg_ckpt=str(ROOT / reg) if (reg and not cascade) else None,
                                clf_ckpt=str(ROOT / clf) if (clf and not cascade) else None,
                                stone_ckpt=str(ROOT / stone) if stone else None,
                                device=cfg["common"]["device"], cfg=icfg)
 
 
 def show_result(path, true_label=None, source=None):
-    pipe = get_pipe(cascade, clf, stone, restrict, seg_thr, clf_thr, learned)
+    pipe = get_pipe(cascade, reg, clf, stone, restrict, seg_thr, clf_thr, learned)
     with st.spinner("Running models ..."):
         res = pipe(path)
     st.subheader(f"Result - {Path(path).name}")
@@ -139,7 +143,7 @@ def show_result(path, true_label=None, source=None):
                       for i, s in enumerate(res["stones"], 1)])
 
 
-if not (cascade or clf or stone):
+if not (cascade or reg or clf or stone):
     st.info("Select at least one trained model in the sidebar (train first - see README).")
     st.stop()
 

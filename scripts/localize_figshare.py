@@ -24,6 +24,7 @@ from tqdm import tqdm
 from src.io_utils import read_gray, resize, to_3ch_tensor
 from src.metrics import classification_metrics, components
 from src.models import StoneUNet
+from src.pipeline import kidney_region
 from src.utils import load_config, resolve, get_device, save_json
 
 KEYS = ["accuracy", "recall", "specificity", "precision", "f1", "roc_auc", "kappa"]
@@ -51,6 +52,14 @@ def main():
     ap.add_argument("--exclude_overlap", action="store_true",
                     help="drop hold-out slices that match a StoneUNet training slice (from check_overlap.py)")
     ap.add_argument("--near", type=float, default=0.95)
+    ap.add_argument("--kidney_only", action="store_true",
+                    help="keep stones only inside the predicted kidney masks (data/kidney/masks, "
+                         "made by predict_kidney_masks.py)")
+    ap.add_argument("--dilate", type=int, default=15, help="kidney mask dilation in pixels (at 512x512)")
+    ap.add_argument("--fallback", action="store_true",
+                    help="if no kidney is found in a slice (e.g. ureter level), search the whole slice")
+    ap.add_argument("--no_hull", action="store_true",
+                    help="use the raw C-shaped kidney mask (default fills it with each kidney's convex hull)")
     ap.add_argument("--config", default=None)
     a = ap.parse_args()
     cfg = load_config(a.config)
@@ -69,6 +78,13 @@ def main():
         df = df[~df["filename"].isin(bad)]
         print(f"excluded {len(bad)} slices that overlap with StoneUNet training data")
         a.out = a.out + "_clean"
+    if a.kidney_only:
+        if not (root / "masks").exists():
+            sys.exit("no kidney masks found - run scripts/predict_kidney_masks.py first")
+        a.out = a.out + "_kidney_only" + ("" if a.no_hull else "_hull") + f"_d{a.dilate}" + ("_fallback" if a.fallback else "")
+        print(f"stones are kept only inside the predicted kidney region "
+              f"({'raw mask' if a.no_hull else 'convex hull'}, dilated {a.dilate} px"
+              f"{', whole slice when no kidney is found' if a.fallback else ''})")
     print(f"{len(df)} Figshare slices ({a.split}): Stone+ {int(df.label.sum())}, Stone- {int((df.label == 0).sum())}")
 
     ck = torch.load(resolve(a.ckpt), map_location="cpu", weights_only=False)
@@ -86,6 +102,10 @@ def main():
         img = resize(img, size)
         with torch.no_grad():
             prob = torch.sigmoid(model(to_3ch_tensor(img)[None].to(device)))[0, 0].cpu().numpy()
+        if a.kidney_only:
+            km = (resize(read_gray(root / "masks" / r.filename)[0], size, cv2.INTER_NEAREST) > 0.5).astype(np.uint8)
+            if km.any() or not a.fallback:
+                prob = prob * kidney_region(km, a.dilate, hull=not a.no_hull)
         stones, _ = components(prob > thr, min_area)
         score = float(prob.max())
         rows.append({"filename": r.filename, "label": int(r.label), "n_stones": len(stones),
@@ -103,7 +123,8 @@ def main():
     m = classification_metrics(y, (res["n_stones"] > 0).astype(float).tolist(), 0.5)
     m["roc_auc"] = classification_metrics(y, res["max_prob"].tolist(), 0.5)["roc_auc"]
     save_json(m, out / "metrics.json")
-    print("\nStoneUNet used as a detector on Figshare (stone found = Stone+):")
+    print("\nStoneUNet used as a detector on Figshare (stone found = Stone+)"
+          + (" - kidney region only:" if a.kidney_only else ":"))
     print("  " + "  ".join(f"{k}={m[k]:.4f}" for k in KEYS))
     print(f"  TP={m['tp']}  FN={m['fn']}  TN={m['tn']}  FP={m['fp']}")
     print(f"  avg stones found: Stone+ slices {res[res.label == 1].n_stones.mean():.2f}, "

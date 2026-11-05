@@ -30,12 +30,13 @@ def main():
     ap.add_argument("--workers", type=int, default=default_workers())
     ap.add_argument("--limit", type=int, default=None, help="debug: use only N samples per split")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--data", default=None, help="dataset with kidney masks (default from config), e.g. data/kidney_masks")
     a = ap.parse_args()
     cfg_all = load_config(a.config)
     cfg = merge_args(cfg_all["i2iregnet"], a)
     seed_everything(cfg_all["common"]["seed"])
     device = get_device(cfg_all["common"]["device"])
-    root = resolve(cfg_all["paths"]["kidney_data"])
+    root = resolve(a.data or cfg_all["paths"]["kidney_data"])
     out = Path(a.out) if a.out else resolve(cfg_all["paths"]["outputs"]) / "i2iregnet" / f"fold{a.fold}"
     out.mkdir(parents=True, exist_ok=True)
 

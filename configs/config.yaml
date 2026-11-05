@@ -66,5 +66,5 @@ inference:
   stone_prob_threshold: 0.5     # classifier P(stone) threshold
   seg_threshold: 0.5
   restrict_to_kidney: true      # keep only stones inside the (dilated) predicted kidney ROI
-  kidney_dilate_px: 15          # dilation of kidney mask at 512 resolution
+  kidney_dilate_px: 30          # dilation of the kidney hull at 512 resolution (best on Figshare)
   dicom_window: [400, 1800]     # level, width (bone-ish window keeps stones visible) for .dcm input
